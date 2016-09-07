@@ -1,0 +1,215 @@
+<html>
+<button class = 'btn'> add live</button>
+<div id = 'container' style = 'width: 1000px; height: 700px'></div>
+<script src="http://code.jquery.com/jquery-latest.min.js"></script>
+<script src="https://code.highcharts.com/highcharts.js"></script>
+<script src="./highcharts-3d.js"></script>
+<script src="./projectionLines.js"></script>
+<script src="./shadowSeries.js"></script>
+<script src="./plotBackgroundColor.js"></script>
+
+<script>
+$(function() {
+  // Set up the chart
+    // Set up the chart
+  var chart = new Highcharts.Chart({
+    chart: {
+    	backgroundColor: '#111',
+    	events: {
+        	load: function() {
+          		this.redraw();
+        }
+      },
+      animation: {
+        duration: 20
+      },
+      renderTo: 'container',
+      margin: 100,
+      type: 'scatter',
+      options3d: {
+        enabled: true,
+        alpha: 10,
+        beta: 50,
+        depth: 450,
+        viewDistance: 5,
+        fitToPlot: false,
+        frame: {
+          bottom: {
+            size: 1,
+            color: 'rgba(0,0,0,0.2)'
+          },
+          back: {
+            size: 1,
+            color: 'rgba(0,0,0,0.2)'
+          },
+          side: {
+            size: 1,
+            color: 'rgba(0,0,0,0.2)'
+          }
+        }
+      }
+    },
+    plotOptions: {
+      scatter: {
+        width: 10,
+        height: 10,
+        depth: 10
+      }
+    },
+    yAxis: {
+      min: 0,
+      max: 10,
+      title: null
+    },
+    xAxis: {
+      min: 0,
+      max: 10,
+      gridLineWidth: 1
+    },
+    zAxis: {
+      min: 0,
+      max: 10,
+      showFirstLabel: false
+    },
+    legend: {
+      enabled: false
+    },
+    series: [{
+      name: 'Data',
+      //  lineProjection: true,
+      // lineProjectionColor: 'blue',
+      //  shadowProjectionColor: 'red',
+      zIndex: 10,
+      animation: {
+        duration: 10
+      },
+      shadowProjection: true,
+      //     shadowProjectionRadius: 13,
+      //  color: 'red',
+      marker: {
+        radius: 13,
+        symbol: 'circle',
+        fillColor: {
+          radialGradient: {
+            cx: 0.4,
+            cy: 0.3,
+            r: 0.5
+          },
+          stops: [
+            [0, 'rgba(195,195,255,1)'],
+            [1, 'rgba(0,0,255,1)']
+          ]
+        }
+      },
+      data: [{
+        x: 7,
+        y: 5,
+        z: 5,
+        color: 'rgba(100,100,200,0.5)'
+      }, {
+        x: 5,
+        y: 5,
+        z: 5,
+        color: 'yellow',
+        marker: {
+          radius: 18,
+          fillColor: {
+            radialGradient: {
+              cx: 0.4,
+              cy: 0.3,
+              r: 0.5
+            },
+            stops: [
+              [0, 'rgba(255,255,255,1)'],
+              [1, 'rgba(255,255,0,1)']
+            ]
+          }
+        }
+      }, {
+        x: 7.5,
+        y: 5,
+        z: 5,
+        color: 'rgba(100,100,100,0.5)',
+        marker: {
+          radius: 4,
+          fillColor: {
+            radialGradient: {
+              cx: 0.4,
+              cy: 0.3,
+              r: 0.5
+            },
+            stops: [
+              [0, 'rgba(159,159,255,1)'],
+              [1, 'rgba(159,159,0,1)']
+            ]
+          }
+        }
+      }]
+    }]
+  }, function(chart) {
+    var series = chart.series[0],
+      i = 1,
+      start = false,
+      cos = Math.cos,
+      sin = Math.sin,
+      PI = Math.PI,
+      x, y, z, interval;
+    $('.btn').click(function() {
+      start = !start;
+      point = series.data[0];
+      point2 = series.data[2];
+      if (start) {
+        interval = setInterval(function() {
+          x = 5;
+          y = 5;
+          z = 4.3;
+          x += 1 * cos(i * 2 * PI / 60);
+          z += 2 * sin(i * 2 * PI / 60);
+          point.update([x, y, z], false);
+
+          x += 0.5 * cos(i * 2 * PI / 30);
+          z += 0.5 * sin(i * 2 * PI / 30);
+          point2.update([x, y, z], false);
+
+          chart.redraw(false);
+
+          i++;
+        }, 40);
+      } else {
+        clearInterval(interval);
+      }
+    });
+  });
+
+
+
+
+  // Add mouse events for rotation
+  $(chart.container).bind('mousedown.hc touchstart.hc', function(eStart) {
+    eStart = chart.pointer.normalize(eStart);
+    var posX = eStart.pageX,
+      posY = eStart.pageY,
+      alpha = chart.options.chart.options3d.alpha,
+      beta = chart.options.chart.options3d.beta,
+      newAlpha,
+      newBeta,
+      sensitivity = 5; // lower is more sensitive
+    $(document).bind({
+      'mousemove.hc touchdrag.hc': function(e) {
+        newBeta = beta + (posX - e.pageX) / sensitivity;
+        chart.options.chart.options3d.beta = newBeta;
+        newAlpha = alpha + (e.pageY - posY) / sensitivity;
+        chart.options.chart.options3d.alpha = newAlpha;
+        chart.redraw(false);
+      },
+      'mouseup touchend': function() {
+        $(document).unbind('.hc');
+      }
+    });
+  });
+
+
+});
+
+</script>
+</html>
